@@ -16,6 +16,19 @@ set :rbenv_prefix, "RBENV_ROOT=#{fetch(:rbenv_path)} RBENV_VERSION=#{fetch(:rben
 set :rbenv_map_bins, %w{rake gem bundle ruby rails}
 set :rbenv_roles, :all # default value
 
+
+namespace :bundle do
+
+  desc "bundle install and ensure all gem requirements are met"
+  task :install do
+     on roles(:app) do
+	    execute "cd #{release_path} && #{fetch(:rbenv_path)}/bin/rbenv exec bundle install   --without=test"
+  	 end
+  end
+
+end
+before "deploy:assets:precompile", "bundle:install"
+
 namespace :deploy do
 
   desc 'Restart application'
@@ -24,7 +37,7 @@ namespace :deploy do
       execute :touch, release_path.join('tmp/restart.txt')
     end
   end
-
+  after "deploy", "deploy:migrate"
   after :publishing, 'deploy:restart'
   after :finishing, 'deploy:cleanup'
 end
