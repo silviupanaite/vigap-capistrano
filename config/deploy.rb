@@ -22,13 +22,23 @@ namespace :bundle do
   desc "bundle install and ensure all gem requirements are met"
   task :install do
      on roles(:app) do
-	    execute "cd #{release_path} && #{fetch(:rbenv_path)}/bin/rbenv exec bundle install   --without=test"
+	    execute "cd #{release_path} && RBENV_ROOT=#{fetch(:rbenv_path)} RBENV_VERSION=#{fetch(:rbenv_ruby)} #{fetch(:rbenv_path)}/bin/rbenv exec bundle install   --without=test"
   	 end
   end
 
 end
 before "deploy:assets:precompile", "bundle:install"
 
+namespace :migrate do
+
+  desc "make migration"
+  task :make do
+     on roles(:app) do
+	    execute "cd #{release_path} && RBENV_ROOT=#{fetch(:rbenv_path)} RBENV_VERSION=#{fetch(:rbenv_ruby)} #{fetch(:rbenv_path)}/bin/rbenv exec rake db:migrate"
+  	 end
+  end
+
+end
 namespace :deploy do
 
   desc 'Restart application'
@@ -37,7 +47,7 @@ namespace :deploy do
       execute :touch, release_path.join('tmp/restart.txt')
     end
   end
-  after "deploy", "deploy:migrate"
+  before "deploy:restart", "migrate:make"
   after :publishing, 'deploy:restart'
   after :finishing, 'deploy:cleanup'
 end
