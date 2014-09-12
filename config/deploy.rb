@@ -34,7 +34,7 @@ namespace :migrate do
   desc "make migration"
   task :make do
      on roles(:app) do
-	    execute "cd #{release_path} && RBENV_ROOT=#{fetch(:rbenv_path)} RBENV_VERSION=#{fetch(:rbenv_ruby)} #{fetch(:rbenv_path)}/bin/rbenv exec rake db:migrate"
+	    execute "cd #{release_path} && RBENV_ROOT=#{fetch(:rbenv_path)} RBENV_VERSION=#{fetch(:rbenv_ruby)} #{fetch(:rbenv_path)}/bin/rbenv exec rake db:migrate RAILS_ENV=production"
   	 end
   end
 
